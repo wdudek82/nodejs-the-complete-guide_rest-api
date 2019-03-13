@@ -11,10 +11,12 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/mongoose": "^5.3.22",
     "body-parser": "^1.18.3",
     "eslint": "^5.15.1",
     "express": "^4.16.4",
     "express-validator": "^5.3.1",
+    "mongoose": "^5.4.19",
     "prettier": "^1.16.4"
   },
   "devDependencies": {

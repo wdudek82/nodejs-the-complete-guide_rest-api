@@ -5,10 +5,10 @@ const feedController = require('../controllers/feedController');
 
 const router = express.Router();
 
-// GET :: /feed/posts
+// GET /feed/posts
 router.get('/posts', feedController.getPosts);
 
-// POST :: /feed/posts
+// POST /feed/posts
 router.post(
   '/post',
   [

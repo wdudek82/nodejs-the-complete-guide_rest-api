@@ -1,5 +1,5 @@
 const express = require('express');
-const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 
 const app = express();
 
@@ -24,6 +24,11 @@ app.use('/feed', feedRoutes);
 const hostname = 'localhost';
 const port = 8080;
 
-app.listen(port, hostname,() => {
-  console.log(`Server running at http://${hostname}:${port}/`);
-});
+mongoose
+  .connect('mongodb://localhost:27017/nodejs-the-complete-guide_rest-api')
+  .then(() => {
+    app.listen(port, hostname, () => {
+      console.log(`Server running at http://${hostname}:${port}/`);
+    });
+  })
+  .catch(console.log);
