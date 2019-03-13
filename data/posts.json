@@ -1,24 +1,47 @@
 {
   "posts": [
     {
+      "creator": {
+        "name": "John Doe"
+      },
       "title": "First Post",
-      "content": "This is the first post"
+      "content": "This is the first post",
+      "imageUrl": "images/unicorn.jpg"
     },
     {
+      "creator": {
+        "name": "John Doe"
+      },
       "title": "Second Post",
-      "content": "This is the second post"
+      "content": "This is the second post",
+      "imageUrl": "images/unicorn.jpg"
     },
     {
+      "creator": {
+        "name": "John Doe"
+      },
       "title": "Third Post",
-      "content": "This is the third post"
+      "name": "John Doe",
+      "content": "This is the third post",
+      "imageUrl": "images/unicorn.jpg"
     },
     {
+      "creator": {
+        "name": "John Doe"
+      },
       "title": "Fourth Post",
-      "content": "This is the fourth post"
+      "name": "John Doe",
+      "content": "This is the fourth post",
+      "imageUrl": "images/unicorn.jpg"
     },
     {
+      "creator": {
+        "name": "John Doe"
+      },
       "title": "Fifth Post",
-      "content": "This is the fifth post"
+      "name": "John Doe",
+      "content": "This is the fifth post",
+      "imageUrl": "images/unicorn.jpg"
     }
   ]
 }
