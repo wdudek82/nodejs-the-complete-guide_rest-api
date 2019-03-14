@@ -45,9 +45,8 @@ app.use((req, res, next) => {
   next();
 });
 app.use((error, req, res, next) => {
-  console.log(error);
-  const { statusCode = 500, message } = error;
-  res.status(statusCode).json(message);
+  const { statusCode = 500, message, data } = error;
+  res.status(statusCode).json({ message, data });
 });
 
 /**
@@ -56,8 +55,8 @@ app.use((error, req, res, next) => {
 const feedRoutes = require('./routes/feedRoutes');
 const authRoutes = require('./routes/authRoutes');
 
-app.use('/feed', feedRoutes);
 app.use('/auth', authRoutes);
+app.use('/feed', feedRoutes);
 
 const hostname = 'localhost';
 const port = 8080;
