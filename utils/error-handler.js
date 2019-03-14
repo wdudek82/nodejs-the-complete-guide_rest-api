@@ -7,6 +7,13 @@ function errorHandler(err, next) {
   next(updErr);
 }
 
+function validationError(errorMessage) {
+  const error = new Error(errorMessage);
+  error.statusCode = 422;
+  throw error;
+}
+
 module.exports = {
   errorHandler,
+  validationError,
 };

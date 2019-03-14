@@ -1,5 +1,5 @@
 const { validationResult } = require('express-validator/check');
-const { errorHandler } = require('../utils/error-handler');
+const { errorHandler, validationError } = require('../utils/error-handler');
 
 const { Post } = require('../models/post');
 
@@ -20,11 +20,20 @@ exports.createPost = (req, res, next) => {
     throw error;
   }
 
+  if (!req.file) {
+    const error = new Error('No image provided!');
+    error.statusCode = 422;
+    throw error;
+  }
+
+  // validationError('No image provided!');
+
   const { title, content } = req.body;
+  const { path } = req.file;
 
   const post = new Post({
     title,
-    imageUrl: 'images/unicorn.jpg',
+    imageUrl: path,
     content,
     creator: { name: 'Max' },
   });
