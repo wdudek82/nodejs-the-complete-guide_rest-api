@@ -44,25 +44,23 @@ app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   next();
 });
-
-/**
- * Routes
- */
-const feedRoutes = require('./routes/feedRoutes');
-
-app.use('/feed', feedRoutes);
-
-const hostname = 'localhost';
-const port = 8080;
-
-/**
- * Error handler
- */
 app.use((error, req, res, next) => {
   console.log(error);
   const { statusCode = 500, message } = error;
   res.status(statusCode).json(message);
 });
+
+/**
+ * Routes
+ */
+const feedRoutes = require('./routes/feedRoutes');
+const authRoutes = require('./routes/authRoutes');
+
+app.use('/feed', feedRoutes);
+app.use('/auth', authRoutes);
+
+const hostname = 'localhost';
+const port = 8080;
 
 mongoose
   .connect('mongodb://localhost:27017/nodejs-the-complete-guide_rest-api')
