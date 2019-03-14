@@ -3,12 +3,24 @@ const path = require('path');
 const { validationResult } = require('express-validator/check');
 const { errorHandler, validationError } = require('../utils/error-handler');
 
-const { Post } = require('../models/post');
+const { Post } = require('../models/postModel');
 
 exports.getPosts = (req, res, next) => {
+  const currentPage = req.query.page || 1;
+  const perPage = 2;
+  let totalItems;
+
   Post.find()
+    .countDocuments()
+    .then((count) => {
+      totalItems = count;
+
+      return Post.find()
+        .skip((currentPage - 1) * perPage)
+        .limit(perPage);
+    })
     .then((posts) => {
-      res.status(200).json({ message: 'Fetched posts successfully.', posts });
+      res.status(200).json({ message: 'Fetched posts successfully.', posts, totalItems });
     })
     .catch((err) => errorHandler(err, next));
 };
