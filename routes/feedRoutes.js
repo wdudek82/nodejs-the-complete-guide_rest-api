@@ -1,6 +1,6 @@
 const express = require('express');
-const { body } = require('express-validator/check');
 
+const validators = require('../utils/validators');
 const feedController = require('../controllers/feedController');
 
 const router = express.Router();
@@ -12,18 +12,10 @@ router.get('/posts', feedController.getPosts);
 router.get('/post/:id', feedController.getPost);
 
 // POST /feed/posts
-router.post(
-  '/post',
-  [
-    body('title')
-      .trim()
-      .isLength({ min: 5 }),
-    body('content')
-      .trim()
-      .isLength({ min: 5 }),
-  ],
-  feedController.createPost,
-);
+router.post('/post', validators.validatePost(), feedController.createPost);
+
+// PUT /feed/post/:id
+router.put('/post/:id', validators.validatePost(), feedController.updatePost);
 
 // DELETE /feed/post/:id
 router.delete('/post/:id', feedController.deletePost);
