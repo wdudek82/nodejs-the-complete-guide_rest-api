@@ -14,10 +14,9 @@ exports.createPost = (req, res, next) => {
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
-    return res.status(422).json({
-      message: 'Validation failed, entered data is incorrect.',
-      errors: errors.array(),
-    });
+    const error = new Error('Validation failed, entered data is incorrect.');
+    error.statusCode = 422;
+    throw error;
   }
 
   const { title, content } = req.body;
@@ -29,16 +28,43 @@ exports.createPost = (req, res, next) => {
     creator: { name: 'Max' },
   });
 
-  console.log('Foo');
-
   return post
     .save()
     .then((result) => {
-      // console.log('Result', result);
       return res.status(201).json({
         message: 'Post created successfully!',
         post: result,
       });
+    })
+    .catch((err) => {
+      const updErr = err;
+      if (!updErr.statusCode) {
+        updErr.statusCode = 500;
+      }
+
+      next(updErr);
+    });
+};
+
+exports.getPost = (req, res, next) => {
+  const { id } = req.params;
+
+  Post.findById({ id })
+    .then((result) => {
+      console.log(result);
+      res.status(200).json({ message: `Post with id ${id} found!`, result });
+    })
+    .catch(console.log);
+};
+
+exports.deletePost = (req, res, next) => {
+  const { id } = req.params;
+
+  Post.deleteOne({ _id: id })
+    .then((result) => {
+      res
+        .status(200)
+        .json({ message: `Successfully deleted post with id ${id}`, result });
     })
     .catch(console.log);
 };
