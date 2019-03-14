@@ -25,11 +25,11 @@ exports.createPost = (req, res, next) => {
   }
 
   const { title, content } = req.body;
-  const { path } = req.file;
+  const { imgPath } = req.file;
 
   const post = new Post({
     title,
-    imageUrl: path,
+    imageUrl: imgPath,
     content,
     creator: { name: 'Max' },
   });
@@ -114,17 +114,30 @@ exports.updatePost = (req, res, next) => {
         post: result,
       });
     })
-    .catch((err) => console.log(err));
+    .catch((err) => errorHandler(err, next));
 };
 
 exports.deletePost = (req, res, next) => {
   const { id } = req.params;
 
-  Post.deleteOne({ _id: id })
+  Post.findById(id)
+    .then((post) => {
+      // Check logged-in user
+
+      if (!post) {
+        const error = new Error('Could not find post.');
+        error.statusCode = 404;
+        throw error;
+      }
+
+      clearImage(post.imageUrl);
+
+      return Post.findByIdAndRemove(id);
+    })
     .then((result) => {
       res
         .status(200)
-        .json({ message: `Successfully deleted post with id ${id}`, result });
+        .json({ message: `Successfully deleted post with id ${id}` });
     })
     .catch((err) => errorHandler(err, next));
 };
