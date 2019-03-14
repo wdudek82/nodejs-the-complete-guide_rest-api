@@ -17,7 +17,7 @@ router.post(
   [
     body('title')
       .trim()
-      .isLength({ min: 8 }),
+      .isLength({ min: 5 }),
     body('content')
       .trim()
       .isLength({ min: 5 }),

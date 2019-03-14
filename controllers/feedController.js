@@ -1,13 +1,14 @@
 const { validationResult } = require('express-validator/check');
+const { errorHandler } = require('../utils/error-handler');
 
 const { Post } = require('../models/post');
 
 exports.getPosts = (req, res, next) => {
   Post.find()
     .then((posts) => {
-      res.status(200).json(posts);
+      res.status(200).json({ message: 'Fetched posts successfully.', posts });
     })
-    .catch(console.log);
+    .catch((err) => errorHandler(err, next));
 };
 
 exports.createPost = (req, res, next) => {
@@ -36,25 +37,25 @@ exports.createPost = (req, res, next) => {
         post: result,
       });
     })
-    .catch((err) => {
-      const updErr = err;
-      if (!updErr.statusCode) {
-        updErr.statusCode = 500;
-      }
-
-      next(updErr);
-    });
+    .catch((err) => errorHandler(err, next));
 };
 
 exports.getPost = (req, res, next) => {
   const { id } = req.params;
 
-  Post.findById({ id })
-    .then((result) => {
-      console.log(result);
-      res.status(200).json({ message: `Post with id ${id} found!`, result });
+  Post.findById(id)
+    .then((post) => {
+      console.log(post);
+
+      if (!post) {
+        const error = new Error('Could not find post.');
+        error.statusCode = 404;
+        throw error;
+      }
+
+      res.status(200).json({ message: `Post with id ${id} found!`, post });
     })
-    .catch(console.log);
+    .catch((err) => errorHandler(err, next));
 };
 
 exports.deletePost = (req, res, next) => {
@@ -66,5 +67,5 @@ exports.deletePost = (req, res, next) => {
         .status(200)
         .json({ message: `Successfully deleted post with id ${id}`, result });
     })
-    .catch(console.log);
+    .catch((err) => errorHandler(err, next));
 };
