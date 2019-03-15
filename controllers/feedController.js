@@ -4,6 +4,7 @@ const { validationResult } = require('express-validator/check');
 const { errorHandler, validationError } = require('../utils/error-handler');
 
 const { Post } = require('../models/postModel');
+const { User } = require('../models/userModel');
 
 exports.getPosts = (req, res, next) => {
   const currentPage = req.query.page || 1;
@@ -20,7 +21,9 @@ exports.getPosts = (req, res, next) => {
         .limit(perPage);
     })
     .then((posts) => {
-      res.status(200).json({ message: 'Fetched posts successfully.', posts, totalItems });
+      res
+        .status(200)
+        .json({ message: 'Fetched posts successfully.', posts, totalItems });
     })
     .catch((err) => errorHandler(err, next));
 };
@@ -37,21 +40,31 @@ exports.createPost = (req, res, next) => {
   }
 
   const { title, content } = req.body;
-  const { imgPath } = req.file;
+  const imageUrl = req.file.path;
+  let creator;
 
   const post = new Post({
     title,
-    imageUrl: imgPath,
+    imageUrl,
     content,
-    creator: { name: 'Max' },
+    creator: req.userId,
   });
 
   return post
     .save()
-    .then((result) => {
+    .then(() => {
+      return User.findById(req.userId);
+    })
+    .then((user) => {
+      creator = user;
+      user.posts.push(post);
+      return user.save();
+    })
+    .then(() => {
       return res.status(201).json({
         message: 'Post created successfully!',
-        post: result,
+        post,
+        creator: { _id: creator._id, name: creator.name },
       });
     })
     .catch((err) => errorHandler(err, next));
@@ -108,6 +121,12 @@ exports.updatePost = (req, res, next) => {
         throw error;
       }
 
+      if (post.creator.toString() !== req.userId) {
+        const error = new Error('Not authorized!');
+        error.statusCode = 403;
+        throw error;
+      }
+
       if (imageUrl !== post.imageUrl) {
         clearImage(post.imageUrl);
       }
@@ -130,11 +149,16 @@ exports.updatePost = (req, res, next) => {
 };
 
 exports.deletePost = (req, res, next) => {
-  const { id } = req.params;
+  const postId = req.params.id;
 
-  Post.findById(id)
+  Post.findById(postId)
     .then((post) => {
-      // Check logged-in user
+
+      if (post.creator.toString() !== req.userId) {
+        const error = new Error('Not authorized!');
+        error.statusCode = 403;
+        throw error;
+      }
 
       if (!post) {
         const error = new Error('Could not find post.');
@@ -144,12 +168,19 @@ exports.deletePost = (req, res, next) => {
 
       clearImage(post.imageUrl);
 
-      return Post.findByIdAndRemove(id);
+      return Post.findByIdAndRemove(postId);
     })
     .then((result) => {
+      return User.findById(req.userId);
+    })
+    .then((user) => {
+      user.posts.pull(postId);
+      user.save();
+    })
+    .then(() => {
       res
         .status(200)
-        .json({ message: `Successfully deleted post with id ${id}` });
+        .json({ message: `Successfully deleted post with id ${postId}` });
     })
     .catch((err) => errorHandler(err, next));
 };
