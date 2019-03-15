@@ -1,5 +1,6 @@
 const { validationResult } = require('express-validator/check');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 const { errorHandler } = require('../utils/error-handler');
 
@@ -34,4 +35,36 @@ exports.signup = (req, res, next) => {
     .catch((err) => errorHandler(err, next));
 };
 
-// exports.
+exports.login = (req, res, next) => {
+  const { email, password } = req.body;
+  let loadedUser;
+
+  User.findOne(email)
+    .then((user) => {
+      if (!user) {
+        const error = new Error('A user with this email could not be found.');
+        error.statusCode = 401;
+        throw error;
+      }
+
+      loadedUser = user;
+
+      return bcrypt.compare(password, user.password);
+    })
+    .then((isEqual) => {
+      if (!isEqual) {
+        const error = new Error('Wrong password!');
+        error.statusCode = 401;
+        throw error;
+      }
+
+      const token = jwt.sign(
+        { email, userId: loadedUser._id.toString() },
+        '!LjvDNIboMh@?M3Z1-/Uz70o:98piA',
+        { expiresIn: '1h' },
+      );
+
+      res.status(200).json({ token, userId: loadedUser._id.toString() });
+    })
+    .catch((err) => errorHandler(err, next));
+};
