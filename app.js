@@ -2,6 +2,7 @@ const path = require('path');
 const express = require('express');
 const mongoose = require('mongoose');
 const multer = require('multer');
+const mySocket = require('./socket');
 
 const app = express();
 
@@ -64,8 +65,11 @@ const port = 8080;
 mongoose
   .connect('mongodb://localhost:27017/nodejs-the-complete-guide_rest-api')
   .then(() => {
-    app.listen(port, hostname, () => {
-      console.log(`Server running at http://${hostname}:${port}/`);
+    const server = app.listen(port, hostname);
+    const io = mySocket.init(server);
+
+    io.on('connection', (socket) => {
+      console.log('Client connected');
     });
   })
   .catch(console.log);
